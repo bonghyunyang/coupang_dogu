@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>상세페이지 YouTube 자동재생 URL 생성기</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      }
+      .container {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 1000px;
+        max-width: 100%;
+      }
+      .tooltip {
+        position: relative;
+        display: inline-block;
+      }
+      .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 200px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body class="flex items-center justify-center min-h-screen">
+    <div class="container bg-white p-8 rounded-lg">
+      <form id="urlForm" class="mb-6">
+        <div class="mb-4">
+          <h1 class="text-2xl font-bold text-gray-800 mb-4">
+            YouTube 자동재생 URL 생성기
+          </h1>
+          <label
+            for="youtubeEmbed"
+            class="block text-gray-700 font-semibold mb-2"
+          >
+            YouTube 소스코드 입력
+            <span class="tooltip ml-2">
+              <span class="text-blue-500 cursor-pointer">?</span>
+              <span class="tooltiptext"
+                >유튜브 영상 우측 클릭 -> 소스 코드 복사</span
+              >
+            </span>
+          </label>
+          <textarea
+            id="youtubeEmbed"
+            placeholder="YouTube 소스코드를 입력하세요"
+            required
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-300"
+          ></textarea>
+        </div>
+        <div class="flex mb-4">
+          <div class="w-1/2 mr-2">
+            <label
+              for="videoWidth"
+              class="block text-gray-700 font-semibold mb-2"
+              >가로 (기본값: 780)</label
+            >
+            <input
+              type="number"
+              id="videoWidth"
+              placeholder="780"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-300"
+            />
+          </div>
+          <div class="w-1/2 ml-2">
+            <label
+              for="videoHeight"
+              class="block text-gray-700 font-semibold mb-2"
+              >높이 (기본값: 440)</label
+            >
+            <input
+              type="number"
+              id="videoHeight"
+              placeholder="440"
+              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-300"
+            />
+          </div>
+        </div>
+        <button
+          type="submit"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring"
+        >
+          자동재생 URL 생성
+        </button>
+      </form>
+      <div>
+        <label
+          for="autoplayEmbed"
+          class="block text-gray-700 font-semibold mb-2"
+          >자동재생 URL</label
+        >
+        <div class="flex mb-4">
+          <textarea
+            id="autoplayEmbed"
+            readonly
+            class="shadow appearance-none border rounded-l w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-300"
+          ></textarea>
+        </div>
+        <button
+          id="copyButton"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring"
+        >
+          복사
+        </button>
+      </div>
+      <iframe
+        id="youtubeIframe"
+        class="w-full rounded-lg"
+        style="
+          width: 780px;
+          height: 440px;
+          margin-top: 50px;
+          margin-bottom: 50px;
+        "
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      ></iframe>
+    </div>
+
+    <script>
+      document
+        .getElementById("urlForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          const embedInput = document.getElementById("youtubeEmbed").value;
+          const videoWidth = document.getElementById("videoWidth").value || 780;
+          const videoHeight =
+            document.getElementById("videoHeight").value || 440;
+          const srcMatch = embedInput.match(/src="([^"]+)"/);
+          if (srcMatch) {
+            const srcUrl = srcMatch[1];
+            const videoId = new URL(srcUrl).pathname.split("/").pop();
+            const autoplayUrl = `https://www.youtube.com/embed/${videoId}?loop=1&autoplay=1&mute=1&playlist=${videoId}`;
+            const autoplayEmbed = embedInput
+              .replace(srcUrl, autoplayUrl)
+              .replace(/width="[^"]+"/, `width="${videoWidth}"`)
+              .replace(/height="[^"]+"/, `height="${videoHeight}"`);
+            document.getElementById("autoplayEmbed").value = autoplayEmbed;
+            document.getElementById(
+              "youtubeIframe"
+            ).style.width = `${videoWidth}px`;
+            document.getElementById(
+              "youtubeIframe"
+            ).style.height = `${videoHeight}px`;
+            document.getElementById("youtubeIframe").src = autoplayUrl;
+          } else {
+            alert("유효한 YouTube 소스코드를 입력하세요.");
+          }
+        });
+
+      document
+        .getElementById("copyButton")
+        .addEventListener("click", function () {
+          if (!document.getElementById("autoplayEmbed").value) {
+            alert("자동재생 URL을 먼저 생성해주세요.");
+            return;
+          }
+          const autoplayEmbedInput = document.getElementById("autoplayEmbed");
+          autoplayEmbedInput.select();
+          autoplayEmbedInput.setSelectionRange(0, 99999);
+          document.execCommand("copy");
+          alert("자동재생 URL이 복사되었습니다!");
+        });
+    </script>
+  </body>
+</html>

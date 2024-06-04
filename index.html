@@ -157,7 +157,9 @@
               .replace(srcUrl, autoplayUrl)
               .replace(/width="[^"]+"/, `width="${videoWidth}"`)
               .replace(/height="[^"]+"/, `height="${videoHeight}"`);
-            document.getElementById("autoplayEmbed").value = autoplayEmbed;
+            const coupangEmbed =
+              '<p style="text-align: center;">' + autoplayEmbed + "</p>";
+            document.getElementById("autoplayEmbed").value = coupangEmbed;
             document.getElementById(
               "youtubeIframe"
             ).style.width = `${videoWidth}px`;
@@ -186,3 +188,5 @@
     </script>
   </body>
 </html>
+
+<!-- <p style="text-align: center;"><iframe title="𝐏𝐥𝐚𝐲𝐥𝐢𝐬𝐭 미친 도입부🔥 도입부 너무 좋아 미쳐버린 팝송만 모아 왔습니다 Charlie Puth, Bruno Mars, Ed Sheeran, Ava Max, Dua Lipa" src="https://www.youtube.com/embed/4UYeKB5YuNM?loop=1&amp;autoplay=1&amp;mute=1&amp;playlist=4UYeKB5YuNM" width="780" height="440" frameborder="0" allowfullscreen="allowfullscreen"></iframe></p> -->

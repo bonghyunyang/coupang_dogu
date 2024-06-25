@@ -157,8 +157,7 @@
               .replace(srcUrl, autoplayUrl)
               .replace(/width="[^"]+"/, `width="${videoWidth}"`)
               .replace(/height="[^"]+"/, `height="${videoHeight}"`);
-            const coupangEmbed =
-              '<p style="text-align: center;">' + autoplayEmbed + "</p>";
+            const coupangEmbed = "<center>" + autoplayEmbed + "</center>";
             document.getElementById("autoplayEmbed").value = coupangEmbed;
             document.getElementById(
               "youtubeIframe"

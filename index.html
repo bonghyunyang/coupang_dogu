@@ -152,7 +152,7 @@
           if (srcMatch) {
             const srcUrl = srcMatch[1];
             const videoId = new URL(srcUrl).pathname.split("/").pop();
-            const autoplayUrl = `https://www.youtube.com/embed/${videoId}?loop=1&autoplay=1&mute=1&playlist=${videoId}`;
+            const autoplayUrl = `https://www.youtube.com/embed/${videoId}?loop=1&autoplay=1&mute=1&controls=0&color=white&modestbranding=0&rel=0&playsinline=1&enablejsapi=1&playlist=${videoId}`;
             const autoplayEmbed = embedInput
               .replace(srcUrl, autoplayUrl)
               .replace(/width="[^"]+"/, `width="${videoWidth}"`)

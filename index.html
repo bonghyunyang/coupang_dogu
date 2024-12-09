@@ -3,140 +3,650 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>상세페이지 YouTube 자동재생 URL 생성기</title>
+    <title>YouTube 자동재생 URL 생성기</title>
     <link
       href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
       rel="stylesheet"
     />
     <style>
+      :root {
+        --primary-bg: #ffffff;
+        --secondary-bg: #f5f5f7;
+        --text-primary: #1d1d1f;
+        --text-secondary: #86868b;
+        --accent: #0066cc;
+        --card-bg: rgba(255, 255, 255, 0.8);
+        --card-shadow: rgba(0, 0, 0, 0.02);
+      }
+
+      :root.dark-mode {
+        --primary-bg: #000000;
+        --secondary-bg: #1c1c1e;
+        --text-primary: #f5f5f7;
+        --text-secondary: #86868b;
+        --accent: #0a84ff;
+        --card-bg: rgba(28, 28, 30, 0.8);
+        --card-shadow: rgba(0, 0, 0, 0.1);
+      }
+
       body {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        font-family: "SF Pro KR", "SF Pro Display", "SF Pro Icons",
+          -apple-system, BlinkMacSystemFont, "Noto Sans KR", sans-serif;
+        line-height: 1.47059;
+        letter-spacing: -0.022em;
+        background-color: var(--primary-bg);
+        color: var(--text-primary);
+        transition: background-color 0.3s, color 0.3s;
       }
+
       .container {
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        width: 1000px;
-        max-width: 100%;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 40px 20px;
       }
+
+      @media (max-width: 834px) {
+        .container {
+          padding: 30px 16px;
+        }
+
+        .card {
+          padding: 30px;
+        }
+
+        h1 {
+          font-size: 40px;
+          line-height: 1.1;
+        }
+
+        .subhead {
+          font-size: 19px;
+          margin-bottom: 30px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .container {
+          padding: 20px 16px;
+        }
+
+        .card {
+          padding: 24px;
+          border-radius: 14px;
+        }
+
+        h1 {
+          font-size: 32px;
+          margin-bottom: 16px;
+        }
+
+        .subhead {
+          font-size: 17px;
+          margin-bottom: 24px;
+        }
+
+        .input-group {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+
+        textarea,
+        input {
+          padding: 12px;
+          font-size: 16px;
+          margin-bottom: 16px;
+        }
+
+        button {
+          width: 100%;
+          padding: 12px 20px;
+        }
+
+        #youtubeIframe {
+          margin: 24px 0;
+        }
+
+        .tooltip .tooltiptext {
+          font-size: 12px;
+          padding: 6px 10px;
+        }
+      }
+
+      /* 가로 모드 대응 */
+      @media (max-height: 600px) and (orientation: landscape) {
+        .container {
+          padding: 20px;
+        }
+
+        .card {
+          padding: 20px;
+        }
+
+        h1 {
+          font-size: 28px;
+          margin-bottom: 12px;
+        }
+
+        .subhead {
+          font-size: 16px;
+          margin-bottom: 20px;
+        }
+
+        textarea {
+          rows: 3;
+        }
+      }
+
+      .card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        border-radius: 18px;
+        padding: 40px;
+        box-shadow: 0 4px 6px var(--card-shadow);
+      }
+
+      h1 {
+        font-size: 48px;
+        line-height: 1.08349;
+        font-weight: 600;
+        letter-spacing: -0.003em;
+        margin-bottom: 20px;
+      }
+
+      .subhead {
+        font-size: 21px;
+        line-height: 1.14286;
+        font-weight: 400;
+        color: var(--text-secondary);
+        margin-bottom: 40px;
+      }
+
+      textarea,
+      input {
+        width: 100%;
+        background: var(--secondary-bg);
+        border: none;
+        border-radius: 12px;
+        padding: 16px;
+        font-size: 17px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+        color: var(--text-primary);
+      }
+
+      textarea:focus,
+      input:focus {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+      }
+
+      button {
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 980px;
+        padding: 12px 22px;
+        font-size: 17px;
+        font-weight: 400;
+        transition: all 0.3s ease;
+        width: auto;
+        min-width: 160px;
+      }
+
+      button:hover {
+        background-color: #0077ed;
+        transform: scale(1.02);
+      }
+
+      label {
+        display: block;
+        font-size: 17px;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        font-weight: 500;
+      }
+
       .tooltip {
         position: relative;
         display: inline-block;
       }
+
       .tooltip .tooltiptext {
         visibility: hidden;
-        width: 200px;
-        background-color: #555;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(20px);
         color: #fff;
         text-align: center;
-        border-radius: 6px;
-        padding: 5px;
+        border-radius: 12px;
+        padding: 8px 12px;
         position: absolute;
         z-index: 1;
         bottom: 125%;
         left: 50%;
-        margin-left: -100px;
+        transform: translateX(-50%);
+        font-size: 14px;
+        white-space: nowrap;
         opacity: 0;
         transition: opacity 0.3s;
       }
+
       .tooltip:hover .tooltiptext {
         visibility: visible;
         opacity: 1;
       }
+
+      .input-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+
+      #youtubeIframe {
+        border-radius: 12px;
+        margin: 40px 0;
+        width: 100%;
+        aspect-ratio: 16/9;
+      }
+
+      /* 탭 네비게이션 스타일 추가 */
+      .nav-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      }
+
+      .tab-navigation {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .tab-group {
+        display: flex;
+        gap: 40px;
+      }
+
+      .tab-item {
+        padding: 16px 0;
+        font-size: 17px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        position: relative;
+        white-space: nowrap;
+        transition: color 0.3s ease;
+      }
+
+      .tab-item:hover {
+        color: var(--text-primary);
+      }
+
+      .tab-item.active {
+        color: var(--text-primary);
+      }
+
+      .tab-item.active::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: var(--accent);
+      }
+
+      .tab-content {
+        display: none;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* 모바일 대응 */
+      @media (max-width: 640px) {
+        .tab-navigation {
+          flex-direction: column;
+          gap: 16px;
+          padding: 12px 16px;
+        }
+
+        .tab-group {
+          width: 100%;
+          gap: 20px;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .theme-switch-wrapper {
+          width: 100%;
+          justify-content: flex-end;
+          padding-top: 8px;
+          border-top: 1px solid var(--text-secondary);
+        }
+
+        .tab-item {
+          font-size: 15px;
+          padding: 12px 0;
+        }
+      }
+
+      /* 광고 컨테이너 스타일 */
+      .ad-container {
+        max-width: 980px;
+        margin: 20px auto;
+        padding: 0 20px;
+        text-align: center;
+      }
+
+      .top-ad {
+        margin-bottom: 40px;
+      }
+
+      .bottom-ad {
+        margin-top: 40px;
+      }
+
+      /* 모바일 대응 */
+      @media (max-width: 640px) {
+        .ad-container {
+          padding: 0 16px;
+          margin: 16px auto;
+        }
+
+        .top-ad {
+          margin-bottom: 20px;
+        }
+
+        .bottom-ad {
+          margin-top: 20px;
+        }
+      }
+
+      /* 다크모드 토글 버튼 스타일 */
+      .dark-mode-toggle {
+        background: none;
+        border: none;
+        padding: 8px;
+        cursor: pointer;
+        position: relative;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        transition: background-color 0.3s;
+      }
+
+      .dark-mode-toggle:hover {
+        background-color: var(--secondary-bg);
+      }
+
+      .dark-mode-toggle svg {
+        width: 24px;
+        height: 24px;
+        fill: var(--text-primary);
+        transition: fill 0.3s;
+      }
+
+      .dark-mode-toggle .moon-icon {
+        display: none;
+      }
+
+      .dark-mode .dark-mode-toggle .sun-icon {
+        display: none;
+      }
+
+      .dark-mode .dark-mode-toggle .moon-icon {
+        display: block;
+      }
+
+      /* 다크모드에서 특별히 처리할 요소들 */
+      .dark-mode .nav-header {
+        background: rgba(0, 0, 0, 0.8);
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .dark-mode textarea,
+      .dark-mode input {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .dark-mode textarea:focus,
+      .dark-mode input:focus {
+        border-color: var(--accent);
+      }
+
+      /* 스위치 버튼 스타일 */
+      .theme-switch-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .theme-label {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      .theme-switch {
+        position: relative;
+        display: inline-block;
+        width: 52px;
+        height: 26px;
+      }
+
+      .theme-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--secondary-bg);
+        transition: 0.4s;
+        border: 1px solid var(--text-secondary);
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 2px;
+        bottom: 2px;
+        background-color: var(--text-secondary);
+        transition: 0.4s;
+      }
+
+      .slider.round {
+        border-radius: 34px;
+      }
+
+      .slider.round:before {
+        border-radius: 50%;
+      }
+
+      input:checked + .slider {
+        background-color: var(--accent);
+        border-color: var(--accent);
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(26px);
+        background-color: white;
+      }
     </style>
+    <!-- Google Analytics (GA4) -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-YEP0KZXKS8"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-YEP0KZXKS8");
+    </script>
+
+    <!-- Google AdSense -->
+    <!-- <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5891138026915892"
+      crossorigin="anonymous"
+    ></script> -->
+
+    <script>
+      // 시스템 다크모드 감지 및 적용
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        document.documentElement.classList.add("dark-mode");
+      }
+    </script>
   </head>
-  <body class="flex items-center justify-center min-h-screen">
-    <div class="container bg-white p-8 rounded-lg">
-      <form id="urlForm" class="mb-6">
-        <div class="mb-4">
-          <h1 class="text-2xl font-bold text-gray-800 mb-4">
-            YouTube 자동재생 URL 생성기
-          </h1>
-          <label
-            for="youtubeEmbed"
-            class="block text-gray-700 font-semibold mb-2"
-          >
-            YouTube 소스코드 입력
-            <span class="tooltip ml-2">
-              <span class="text-blue-500 cursor-pointer">?</span>
-              <span class="tooltiptext"
-                >유튜브 영상 우측 클릭 -> 소스 코드 복사</span
-              >
-            </span>
+  <body class="min-h-screen">
+    <header class="nav-header">
+      <nav class="tab-navigation">
+        <div class="tab-group">
+          <a href="#youtube-url" class="tab-item active" data-tab="youtube-url">
+            URL 생성기
+          </a>
+          <a href="#thumbnail" class="tab-item" data-tab="thumbnail">
+            썸네일 추출
+          </a>
+          <a href="#converter" class="tab-item" data-tab="converter">
+            동영상 변환
+          </a>
+        </div>
+        <div class="theme-switch-wrapper">
+          <label class="theme-switch" for="darkModeToggle">
+            <input type="checkbox" id="darkModeToggle" />
+            <span class="slider round"></span>
           </label>
-          <textarea
-            id="youtubeEmbed"
-            placeholder="YouTube 소스코드를 입력하세요"
-            required
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-300"
-          ></textarea>
+          <span class="theme-label">다크모드</span>
         </div>
-        <div class="flex mb-4">
-          <div class="w-1/2 mr-2">
-            <label
-              for="videoWidth"
-              class="block text-gray-700 font-semibold mb-2"
-              >가로 (기본값: 780)</label
-            >
-            <input
-              type="number"
-              id="videoWidth"
-              placeholder="780"
-              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-300"
-            />
+      </nav>
+    </header>
+
+    <!-- 컨테이너 시작 전 상단 광고 -->
+    <!-- <div class="ad-container top-ad">
+      <ins
+        class="adsbygoogle"
+        style="display: block"
+        data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+        data-ad-slot="XXXXXXXXXX"
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      >
+      </ins>
+    </div> -->
+
+    <div class="container">
+      <div class="tab-content active" id="youtube-url">
+        <div class="card">
+          <h1>YouTube 자동재생 URL 생성기</h1>
+          <p class="subhead">
+            YouTube 영상을 무한 자동재생 가능한 형태로 변환해드립니다.
+          </p>
+
+          <form id="urlForm">
+            <div class="mb-6">
+              <label for="youtubeEmbed">
+                YouTube 소스코드
+                <span class="tooltip ml-2">
+                  <span class="text-accent">?</span>
+                  <span class="tooltiptext"
+                    >유튜브 영상 우측 클릭 → 소스 코드 복사</span
+                  >
+                </span>
+              </label>
+              <textarea
+                id="youtubeEmbed"
+                rows="4"
+                placeholder="YouTube 소스코드를 입력하세요"
+                required
+              ></textarea>
+            </div>
+
+            <div class="input-group">
+              <div>
+                <label for="videoWidth">가로 크기</label>
+                <input type="number" id="videoWidth" placeholder="780" />
+              </div>
+              <div>
+                <label for="videoHeight">세로 크기</label>
+                <input type="number" id="videoHeight" placeholder="440" />
+              </div>
+            </div>
+
+            <button type="submit">URL 생성하기</button>
+          </form>
+
+          <div class="mt-8">
+            <label for="autoplayEmbed">자동재생 URL</label>
+            <textarea id="autoplayEmbed" rows="4" readonly></textarea>
+            <button id="copyButton">복사하기</button>
           </div>
-          <div class="w-1/2 ml-2">
-            <label
-              for="videoHeight"
-              class="block text-gray-700 font-semibold mb-2"
-              >높이 (기본값: 440)</label
-            >
-            <input
-              type="number"
-              id="videoHeight"
-              placeholder="440"
-              class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-300"
-            />
-          </div>
+
+          <iframe
+            id="youtubeIframe"
+            allowfullscreen
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+          >
+          </iframe>
         </div>
-        <button
-          type="submit"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring"
-        >
-          자동재생 URL 생성
-        </button>
-      </form>
-      <div>
-        <label
-          for="autoplayEmbed"
-          class="block text-gray-700 font-semibold mb-2"
-          >자동재생 URL</label
-        >
-        <div class="flex mb-4">
-          <textarea
-            id="autoplayEmbed"
-            readonly
-            class="shadow appearance-none border rounded-l w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-300"
-          ></textarea>
-        </div>
-        <button
-          id="copyButton"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring"
-        >
-          복사
-        </button>
       </div>
-      <iframe
-        id="youtubeIframe"
-        class="w-full rounded-lg"
-        style="
-          width: 780px;
-          height: 440px;
-          margin-top: 50px;
-          margin-bottom: 50px;
-        "
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        referrerpolicy="strict-origin-when-cross-origin"
-        allowfullscreen
-      ></iframe>
+
+      <div class="tab-content" id="thumbnail">
+        <div class="card">
+          <h1>썸네일 추출</h1>
+          <p class="subhead">기능 준비중입니다.</p>
+          <!-- 썸네일 추출 기능 내용 -->
+        </div>
+      </div>
+
+      <div class="tab-content" id="converter">
+        <div class="card">
+          <h1>동영상 변환</h1>
+          <p class="subhead">기능 준비중입니다.</p>
+          <!-- 동영상 변환 기능 내용 -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 컨테이너 끝난 후 하단 광고 -->
+    <div class="ad-container bottom-ad">
+      <ins
+        class="adsbygoogle"
+        style="display: block"
+        data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+        data-ad-slot="XXXXXXXXXX"
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      >
+      </ins>
     </div>
 
     <script>
@@ -169,6 +679,10 @@
           } else {
             alert("유효한 YouTube 소스코드를 입력하세요.");
           }
+          gtag("event", "generate_url", {
+            event_category: "engagement",
+            event_label: "URL 생성",
+          });
         });
 
       document
@@ -183,7 +697,71 @@
           autoplayEmbedInput.setSelectionRange(0, 99999);
           document.execCommand("copy");
           alert("자동재생 URL이 복사되었습니다!");
+          gtag("event", "copy_url", {
+            event_category: "engagement",
+            event_label: "URL 복사",
+          });
         });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const tabs = document.querySelectorAll(".tab-item");
+        const contents = document.querySelectorAll(".tab-content");
+
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", (e) => {
+            e.preventDefault();
+
+            // 활성 탭 스타일 변경
+            tabs.forEach((t) => t.classList.remove("active"));
+            tab.classList.add("active");
+
+            // 컨텐츠 전환
+            const targetId = tab.getAttribute("data-tab");
+            contents.forEach((content) => {
+              content.classList.remove("active");
+              if (content.id === targetId) {
+                content.classList.add("active");
+              }
+            });
+            gtag("event", "tab_change", {
+              event_category: "navigation",
+              event_label: tab.getAttribute("data-tab"),
+            });
+          });
+        });
+      });
+
+      // 다크모드 토글 기능
+      document
+        .getElementById("darkModeToggle")
+        .addEventListener("click", function () {
+          document.documentElement.classList.toggle("dark-mode");
+
+          // 사용자 선택 저장
+          localStorage.setItem(
+            "darkMode",
+            document.documentElement.classList.contains("dark-mode")
+          );
+
+          // 이벤트 추적
+          gtag("event", "toggle_dark_mode", {
+            event_category: "preferences",
+            event_label: document.documentElement.classList.contains(
+              "dark-mode"
+            )
+              ? "dark"
+              : "light",
+          });
+        });
+
+      // 저장된 다크모드 설정 불러오기
+      document.addEventListener("DOMContentLoaded", function () {
+        const savedDarkMode = localStorage.getItem("darkMode");
+
+        if (savedDarkMode === "true") {
+          document.documentElement.classList.add("dark-mode");
+        }
+      });
     </script>
     <script
       async

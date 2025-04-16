@@ -67,48 +67,83 @@
 
       @media (max-width: 640px) {
         .container {
-          padding: 20px 16px;
+          padding: 16px;
         }
 
         .card {
-          padding: 24px;
+          padding: 20px;
           border-radius: 14px;
         }
 
         h1 {
-          font-size: 32px;
-          margin-bottom: 16px;
+          font-size: 24px;
+          line-height: 1.2;
+          margin-bottom: 12px;
+          word-break: keep-all;
         }
 
         .subhead {
-          font-size: 17px;
-          margin-bottom: 24px;
+          font-size: 15px;
+          margin-bottom: 20px;
+          word-break: keep-all;
         }
 
         .input-group {
-          grid-template-columns: 1fr;
-          gap: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          margin-bottom: 16px;
         }
 
-        textarea,
-        input {
-          padding: 12px;
+        .input-group > div {
+          width: 100%;
+        }
+
+        input[type="number"] {
+          height: 44px;
           font-size: 16px;
-          margin-bottom: 16px;
+          padding: 0 12px;
+        }
+
+        textarea {
+          font-size: 16px;
+          padding: 12px;
+          min-height: 100px;
         }
 
         button {
           width: 100%;
-          padding: 12px 20px;
+          height: 44px;
+          font-size: 16px;
+          padding: 0;
+          margin-bottom: 16px;
         }
 
         #youtubeIframe {
-          margin: 24px 0;
+          width: 100%;
+          margin: 20px 0;
+          aspect-ratio: 16/9;
         }
 
         .tooltip .tooltiptext {
-          font-size: 12px;
-          padding: 6px 10px;
+          width: auto;
+          white-space: nowrap;
+          font-size: 14px;
+          padding: 8px 12px;
+        }
+      }
+
+      @media (max-width: 360px) {
+        h1 {
+          font-size: 22px;
+        }
+
+        .subhead {
+          font-size: 14px;
+        }
+
+        .card {
+          padding: 16px;
         }
       }
 
@@ -594,11 +629,25 @@
             <div class="input-group">
               <div>
                 <label for="videoWidth">가로 크기</label>
-                <input type="number" id="videoWidth" placeholder="780" />
+                <input 
+                  type="number" 
+                  id="videoWidth" 
+                  placeholder="780" 
+                  min="200"
+                  max="1920"
+                  class="w-full"
+                />
               </div>
               <div>
                 <label for="videoHeight">세로 크기</label>
-                <input type="number" id="videoHeight" placeholder="440" />
+                <input 
+                  type="number" 
+                  id="videoHeight" 
+                  placeholder="440" 
+                  min="200"
+                  max="1080"
+                  class="w-full"
+                />
               </div>
             </div>
 
@@ -624,55 +673,8 @@
       <div class="tab-content" id="thumbnail">
         <div class="card">
           <h1>썸네일 추출</h1>
-          <p class="subhead">이미지를 업로드하여 배경을 제거하세요.</p>
-          
-          <form id="thumbnailForm" class="mb-8">
-            <div class="mb-6">
-              <label for="imageUpload">이미지 업로드</label>
-              <input 
-                type="file" 
-                id="imageUpload" 
-                accept="image/*"
-                class="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-accent file:text-white
-                hover:file:bg-blue-600"
-              />
-            </div>
-
-            <button type="submit" class="bg-accent text-white px-6 py-2 rounded-full">
-              배경 제거하기
-            </button>
-          </form>
-
-          <div id="resultContainer" class="hidden">
-            <div class="grid grid-cols-2 gap-4">
-              <div>
-                <h3 class="text-lg font-semibold mb-2">원본 이미지</h3>
-                <img id="originalImage" class="w-full rounded-lg" />
-              </div>
-              <div>
-                <h3 class="text-lg font-semibold mb-2">배경 제거된 이미지</h3>
-                <canvas id="outputCanvas" class="w-full rounded-lg"></canvas>
-              </div>
-            </div>
-            <div class="mt-4">
-              <button id="downloadButton" class="bg-accent text-white px-6 py-2 rounded-full">
-                다운로드
-              </button>
-            </div>
-          </div>
-
-          <div id="loadingIndicator" class="hidden">
-            <div class="flex items-center justify-center space-x-2 my-8">
-              <div class="w-4 h-4 bg-accent rounded-full animate-bounce"></div>
-              <div class="w-4 h-4 bg-accent rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
-              <div class="w-4 h-4 bg-accent rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
-            </div>
-            <p class="text-center text-gray-500">이미지 처리중...</p>
-          </div>
+          <p class="subhead">기능 준비중입니다.</p>
+          <!-- 기존 썸네일 관련 코드 제거 -->
         </div>
       </div>
 
@@ -733,16 +735,17 @@
               }
 
               const autoplayUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&controls=0&playlist=${videoId}`;
-              const autoplayEmbed = `<iframe style="pointer-events:none" src="${autoplayUrl}" width="${videoWidth}" height="${videoHeight}" frameborder="0" allowfullscreen=""></iframe>`;
+              const autoplayEmbed = `<iframe style="pointer-events:none; width: 100%; max-width: ${videoWidth}px; aspect-ratio: 16/9;" src="${autoplayUrl}" frameborder="0" allowfullscreen=""></iframe>`;
               const coupangEmbed = "<center>" + autoplayEmbed + "</center>";
               
               document.getElementById("autoplayEmbed").value = coupangEmbed;
 
-              // 미리보기 iframe 업데이트
+              // 미리보기 iframe도 반응형으로 설정
               const previewIframe = document.getElementById("youtubeIframe");
               previewIframe.style.pointerEvents = "none";
-              previewIframe.style.width = `${videoWidth}px`;
-              previewIframe.style.height = `${videoHeight}px`;
+              previewIframe.style.width = "100%";
+              previewIframe.style.maxWidth = `${videoWidth}px`;
+              previewIframe.style.aspectRatio = "16/9";
               previewIframe.src = autoplayUrl;
 
             } catch (error) {

@@ -524,6 +524,8 @@
         document.documentElement.classList.add("dark-mode");
       }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2.2.0/dist/body-pix.min.js"></script>
   </head>
   <body class="min-h-screen">
     <header class="nav-header">
@@ -622,8 +624,55 @@
       <div class="tab-content" id="thumbnail">
         <div class="card">
           <h1>썸네일 추출</h1>
-          <p class="subhead">기능 준비중입니다.</p>
-          <!-- 썸네일 추출 기능 내용 -->
+          <p class="subhead">이미지를 업로드하여 배경을 제거하세요.</p>
+          
+          <form id="thumbnailForm" class="mb-8">
+            <div class="mb-6">
+              <label for="imageUpload">이미지 업로드</label>
+              <input 
+                type="file" 
+                id="imageUpload" 
+                accept="image/*"
+                class="block w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-accent file:text-white
+                hover:file:bg-blue-600"
+              />
+            </div>
+
+            <button type="submit" class="bg-accent text-white px-6 py-2 rounded-full">
+              배경 제거하기
+            </button>
+          </form>
+
+          <div id="resultContainer" class="hidden">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <h3 class="text-lg font-semibold mb-2">원본 이미지</h3>
+                <img id="originalImage" class="w-full rounded-lg" />
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold mb-2">배경 제거된 이미지</h3>
+                <canvas id="outputCanvas" class="w-full rounded-lg"></canvas>
+              </div>
+            </div>
+            <div class="mt-4">
+              <button id="downloadButton" class="bg-accent text-white px-6 py-2 rounded-full">
+                다운로드
+              </button>
+            </div>
+          </div>
+
+          <div id="loadingIndicator" class="hidden">
+            <div class="flex items-center justify-center space-x-2 my-8">
+              <div class="w-4 h-4 bg-accent rounded-full animate-bounce"></div>
+              <div class="w-4 h-4 bg-accent rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+              <div class="w-4 h-4 bg-accent rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+            </div>
+            <p class="text-center text-gray-500">이미지 처리중...</p>
+          </div>
         </div>
       </div>
 
@@ -656,26 +705,50 @@
           event.preventDefault();
           const embedInput = document.getElementById("youtubeEmbed").value;
           const videoWidth = document.getElementById("videoWidth").value || 780;
-          const videoHeight =
-            document.getElementById("videoHeight").value || 440;
+          const videoHeight = document.getElementById("videoHeight").value || 440;
           const srcMatch = embedInput.match(/src="([^"]+)"/);
           if (srcMatch) {
-            const srcUrl = srcMatch[1];
-            const videoId = new URL(srcUrl).pathname.split("/").pop();
-            const autoplayUrl = `https://www.youtube.com/embed/${videoId}?loop=1&autoplay=1&mute=1&controls=0&color=white&modestbranding=0&rel=0&playsinline=1&enablejsapi=1&playlist=${videoId}`;
-            const autoplayEmbed = embedInput
-              .replace(srcUrl, autoplayUrl)
-              .replace(/width="[^"]+"/, `width="${videoWidth}"`)
-              .replace(/height="[^"]+"/, `height="${videoHeight}"`);
-            const coupangEmbed = "<center>" + autoplayEmbed + "</center>";
-            document.getElementById("autoplayEmbed").value = coupangEmbed;
-            document.getElementById(
-              "youtubeIframe"
-            ).style.width = `${videoWidth}px`;
-            document.getElementById(
-              "youtubeIframe"
-            ).style.height = `${videoHeight}px`;
-            document.getElementById("youtubeIframe").src = autoplayUrl;
+            try {
+              const srcUrl = srcMatch[1];
+              let videoId;
+              
+              // YouTube URL에서 비디오 ID 추출을 위한 정규식 패턴
+              const patterns = [
+                /\/embed\/([^/?]+)/,      // embed URL 패턴
+                /\/watch\?v=([^&]+)/,     // watch URL 패턴
+                /youtu\.be\/([^/?]+)/     // 단축 URL 패턴
+              ];
+
+              // 패턴 매칭 시도
+              for (const pattern of patterns) {
+                const match = srcUrl.match(pattern);
+                if (match) {
+                  videoId = match[1];
+                  break;
+                }
+              }
+
+              if (!videoId) {
+                throw new Error("비디오 ID를 찾을 수 없습니다.");
+              }
+
+              const autoplayUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&controls=0&playlist=${videoId}`;
+              const autoplayEmbed = `<iframe style="pointer-events:none" src="${autoplayUrl}" width="${videoWidth}" height="${videoHeight}" frameborder="0" allowfullscreen=""></iframe>`;
+              const coupangEmbed = "<center>" + autoplayEmbed + "</center>";
+              
+              document.getElementById("autoplayEmbed").value = coupangEmbed;
+
+              // 미리보기 iframe 업데이트
+              const previewIframe = document.getElementById("youtubeIframe");
+              previewIframe.style.pointerEvents = "none";
+              previewIframe.style.width = `${videoWidth}px`;
+              previewIframe.style.height = `${videoHeight}px`;
+              previewIframe.src = autoplayUrl;
+
+            } catch (error) {
+              console.error("URL 처리 중 오류:", error);
+              alert("YouTube URL을 처리하는 중 오류가 발생했습니다. 올바른 소스코드인지 확인해주세요.");
+            }
           } else {
             alert("유효한 YouTube 소스코드를 입력하세요.");
           }
@@ -760,6 +833,154 @@
 
         if (savedDarkMode === "true") {
           document.documentElement.classList.add("dark-mode");
+        }
+      });
+
+      // 이미지 배경 제거 기능
+      let net;
+
+      // BodyPix 모델 로드
+      async function loadModel() {
+        net = await bodyPix.load({
+          architecture: 'MobileNetV1',
+          outputStride: 16,
+          multiplier: 0.75,
+          quantBytes: 2
+        });
+      }
+
+      // 초기화 실행
+      loadModel();
+
+      // 이미지 처리 함수
+      async function processImage(imageElement) {
+        try {
+          // 세그멘테이션 수행
+          const segmentation = await net.segmentPerson(imageElement, {
+            flipHorizontal: false,
+            internalResolution: 'high',
+            segmentationThreshold: 0.5,
+            maxDetections: 1
+          });
+
+          const canvas = document.getElementById('outputCanvas');
+          const ctx = canvas.getContext('2d');
+          
+          // 캔버스 크기 설정
+          canvas.width = imageElement.naturalWidth;
+          canvas.height = imageElement.naturalHeight;
+
+          // 배경을 투명하게 설정
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          // 원본 이미지 그리기
+          ctx.drawImage(imageElement, 0, 0);
+
+          // 마스크 적용
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const pixels = imageData.data;
+          
+          // 세그멘테이션 데이터가 있는지 확인
+          if (!segmentation || !segmentation.data || segmentation.data.length === 0) {
+            console.error('세그멘테이션 데이터가 없습니다.');
+            return;
+          }
+
+          console.log('세그멘테이션 데이터 크기:', segmentation.data.length);
+          console.log('이미지 픽셀 데이터 크기:', pixels.length / 4);
+
+          // 마스크 적용
+          for (let i = 0; i < segmentation.data.length; i++) {
+            const pixelIndex = i * 4;
+            if (!segmentation.data[i]) {
+              // 배경으로 판단된 픽셀을 완전히 투명하게
+              pixels[pixelIndex + 3] = 0;
+            } else {
+              // 전경(사람)으로 판단된 픽셀은 그대로 유지
+              // 필요한 경우 여기서 픽셀 값을 조정할 수 있습니다
+            }
+          }
+
+          // 처리된 이미지 데이터를 캔버스에 그리기
+          ctx.putImageData(imageData, 0, 0);
+
+          // 디버깅을 위한 정보 출력
+          console.log('이미지 처리 완료');
+          console.log('캔버스 크기:', canvas.width, 'x', canvas.height);
+          
+        } catch (error) {
+          console.error('이미지 처리 중 오류 발생:', error);
+          throw error;
+        }
+      }
+
+      document.getElementById('thumbnailForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        const fileInput = document.getElementById('imageUpload');
+        
+        if (!fileInput.files[0]) {
+          alert('이미지를 선택해주세요.');
+          return;
+        }
+
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const resultContainer = document.getElementById('resultContainer');
+        
+        try {
+          // 로딩 표시
+          loadingIndicator.classList.remove('hidden');
+          resultContainer.classList.add('hidden');
+
+          // 모델이 로드되지 않은 경우 다시 로드
+          if (!net) {
+            console.log('모델 로딩 시작...');
+            await loadModel();
+            console.log('모델 로딩 완료');
+          }
+
+          // 원본 이미지 미리보기
+          const originalImage = document.getElementById('originalImage');
+          
+          // 이미지 로드 프로미스 생성
+          const imageLoadPromise = new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+              originalImage.onload = () => resolve();
+              originalImage.onerror = () => reject(new Error('이미지 로드 실패'));
+              originalImage.src = e.target.result;
+            };
+            
+            reader.onerror = () => reject(new Error('파일 읽기 실패'));
+            reader.readAsDataURL(fileInput.files[0]);
+          });
+
+          // 이미지 로드 대기
+          await imageLoadPromise;
+          console.log('이미지 로드 완료:', originalImage.naturalWidth, 'x', originalImage.naturalHeight);
+
+          // 이미지 처리
+          await processImage(originalImage);
+          
+          // 결과 표시
+          resultContainer.classList.remove('hidden');
+
+          // GA 이벤트 추적
+          gtag('event', 'remove_background', {
+            'event_category': 'image_processing',
+            'event_label': 'success'
+          });
+
+        } catch (error) {
+          console.error('처리 중 오류:', error);
+          alert('이미지 처리 중 오류가 발생했습니다: ' + error.message);
+          gtag('event', 'remove_background', {
+            'event_category': 'image_processing',
+            'event_label': 'error'
+          });
+        } finally {
+          loadingIndicator.classList.add('hidden');
         }
       });
     </script>

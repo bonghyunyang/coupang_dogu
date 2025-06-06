@@ -734,10 +734,10 @@
                 throw new Error("비디오 ID를 찾을 수 없습니다.");
               }
 
-              const autoplayUrl = `https://www.youtube.com/embed/${videoId}?loop=1&autoplay=1&mute=1&controls=0&color=white&modestbranding=0&rel=0&playsinline=1&enablejsapi=1&playlist=${videoId}`;
+              const autoplayUrl = `https://www.youtube.com/embed/${videoId}?loop=1&autoplay=1&mute=1&controls=0&color=white&modestbranding=0&rel=0&enablejsapi=1&playlist=${videoId}`;
               const autoplayEmbed = embedInput
                 .replace(srcUrl, autoplayUrl)
-                .replace(/<iframe/, '<iframe style="pointer-events:none;"')
+                .replace(/<iframe/, '<iframe allow="autoplay; encrypted-media"')
                 .replace(/width="[^"]+"/, `width="${videoWidth}"`)
                 .replace(/height="[^"]+"/, `height="${videoHeight}"`);
               const coupangEmbed = "<center>" + autoplayEmbed + "</center>";

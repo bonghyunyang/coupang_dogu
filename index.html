@@ -734,10 +734,10 @@
                 throw new Error("비디오 ID를 찾을 수 없습니다.");
               }
 
-              const autoplayUrl = `https://www.youtube.com/embed/${videoId}?loop=1&autoplay=1&mute=1&controls=0&color=white&modestbranding=0&rel=0&enablejsapi=1&playlist=${videoId}`;
+              const autoplayUrl = `https://www.youtube.com/embed/${videoId}?loop=1&autoplay=1&mute=1&controls=0&color=white&modestbranding=1&rel=0&playsinline=1&enablejsapi=1&playlist=${videoId}`;
               const autoplayEmbed = embedInput
                 .replace(srcUrl, autoplayUrl)
-                .replace(/<iframe/, '<iframe allow="autoplay; encrypted-media"')
+                .replace(/<iframe/, '<iframe style="pointer-events: none; user-select: none; -webkit-user-select: none;"')
                 .replace(/width="[^"]+"/, `width="${videoWidth}"`)
                 .replace(/height="[^"]+"/, `height="${videoHeight}"`);
               const coupangEmbed = "<center>" + autoplayEmbed + "</center>";
@@ -747,6 +747,8 @@
               // 미리보기 iframe도 반응형으로 설정
               const previewIframe = document.getElementById("youtubeIframe");
               previewIframe.style.pointerEvents = "none";
+              previewIframe.style.userSelect = "none";
+              previewIframe.style.webkitUserSelect = "none";
               previewIframe.style.width = "100%";
               previewIframe.style.maxWidth = `${videoWidth}px`;
               previewIframe.style.aspectRatio = "16/9";
